@@ -7,7 +7,17 @@ struct node {
     node* next;
 };
 
-node* createList(node* head) {  
+// 释放链表内存，防止内存泄漏
+void deleteList(node* head) {
+    node* current = head;
+    while (current != nullptr) {
+        node* nextNode = current->next;
+        delete current;
+        current = nextNode;
+    }
+}
+
+node* createList(node* head) {
     node* tail = head;
     for (int i = 0; i < head->val; i++) {
         node* newNode = new node;
@@ -16,7 +26,6 @@ node* createList(node* head) {
         tail->next = newNode;
         tail = newNode;
     }
-    
     return head;
 }
 
@@ -43,33 +52,33 @@ node* addLists(node* headA, node* headB)
         // 找到正确的插入位置（按行优先顺序）
         node* prev = newHead;
         node* curr = newHead->next;
-    
-        while (curr != nullptr && 
-                (curr->row < newNode->row || 
-                (curr->row == newNode->row && curr->col < newNode->col))) 
+
+        while (curr != nullptr &&
+            (curr->row < newNode->row ||
+                (curr->row == newNode->row && curr->col < newNode->col)))
         {
             prev = curr;
             curr = curr->next;
-        }        
+        }
         // 插入新节点
         newNode->next = curr;
         prev->next = newNode;
 
-            
+
     }
     while (p2 != nullptr)
     {
         // 找到正确的插入位置（按行优先顺序）
         node* prev = newHead;
         node* curr = newHead->next;
-    
-        while (curr != nullptr && 
-                (curr->row < p2->row || 
-                (curr->row == p2->row && curr->col < p2->col))) 
+
+        while (curr != nullptr &&
+            (curr->row < p2->row ||
+                (curr->row == p2->row && curr->col < p2->col)))
         {
             prev = curr;
             curr = curr->next;
-        }        
+        }
         if (curr != nullptr && p2->row == curr->row && p2->col == curr->col)
         {
             if (curr->val + p2->val == 0)
@@ -102,22 +111,28 @@ node* addLists(node* headA, node* headB)
     return newHead;
 }
 
+// ======================= 修正后的打印函数 =======================
 void printList(node* head)
 {
-    node* p1 = head;
-    for (int i = 0; i <= head->val; i++)
-    {
-        cout << p1->row << " " << p1->col << " " << p1->val;
-        if (i != head->val)
-        {
-            cout << " " << endl;
-        }
-        p1 = p1->next;
+    if (head == nullptr) {
+        return;
+    }
+
+    // 1. 先打印头信息，并换行
+    cout << head->row << " " << head->col << " " << head->val << endl;
+
+    // 2. 遍历后续节点，每打印一个就换行
+    node* p = head->next;
+    while (p != nullptr) {
+        cout << p->row << " " << p->col << " " << p->val << endl;
+        p = p->next;
     }
 }
+// =============================================================
+
 
 int main() {
-    node* headA = NULL, *headB = NULL, *headC = NULL;
+    node* headA = NULL, * headB = NULL, * headC = NULL;
     int row, col;
     cin >> row >> col;
     headA = new node;
@@ -131,6 +146,13 @@ int main() {
     cin >> headB->val;
     headB = createList(headB);
     headC = addLists(headA, headB);
+    
     printList(headC);
+
+    // 在程序结束前，释放所有动态分配的内存
+    deleteList(headA);
+    deleteList(headB);
+    deleteList(headC);
+
     return 0;
 }
